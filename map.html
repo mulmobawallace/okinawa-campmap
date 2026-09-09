@@ -1,0 +1,272 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+      :root {
+        --npb: #2563eb;
+        --kbo: #ea580c;
+        --cpbl: #dc2626;
+        --jleague: #16a34a;
+        --other: #64748b;
+        --ink: #1e293b;
+        --muted: #64748b;
+        --line: #e2e8f0;
+        --bg: #f8fafc;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        color: var(--ink);
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        background: #fff;
+        z-index: 10;
+      }
+      header h1 {
+        font-size: 15px;
+        margin: 0;
+        white-space: nowrap;
+      }
+      header a.nav {
+        font-size: 12px;
+        color: #2563eb;
+        text-decoration: none;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 5px 10px;
+      }
+      header a.nav:hover {
+        background: var(--bg);
+      }
+      .legend {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        font-size: 12px;
+      }
+      .legend label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+      }
+      .dot.NPB {
+        background: var(--npb);
+      }
+      .dot.KBO {
+        background: var(--kbo);
+      }
+      .dot.CPBL {
+        background: var(--cpbl);
+      }
+      .dot.Jリーグ {
+        background: var(--jleague);
+      }
+      .dot.その他 {
+        background: var(--other);
+      }
+      .spacer {
+        flex: 1;
+      }
+      .main {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+      }
+      #map {
+        flex: 1;
+        min-width: 0;
+      }
+      .err {
+        padding: 16px;
+        color: #b91c1c;
+        font-size: 13px;
+      }
+      /* Popup styling */
+      .lp {
+        font-size: 13px;
+        min-width: 220px;
+        max-width: 260px;
+      }
+      .lp .title {
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 2px;
+      }
+      .lp .badge {
+        display: inline-block;
+        font-size: 11px;
+        color: #fff;
+        border-radius: 4px;
+        padding: 1px 6px;
+        margin-bottom: 6px;
+      }
+      .lp .row {
+        margin: 3px 0;
+        line-height: 1.4;
+      }
+      .lp .row b {
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .lp a {
+        color: #2563eb;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>沖縄キャンプ地図</h1>
+      <div class="legend" id="legend">
+        <label><input type="checkbox" data-genre="NPB" checked /><span class="dot NPB"></span>NPB</label>
+        <label><input type="checkbox" data-genre="KBO" checked /><span class="dot KBO"></span>KBO</label>
+        <label><input type="checkbox" data-genre="CPBL" checked /><span class="dot CPBL"></span>CPBL</label>
+        <label><input type="checkbox" data-genre="Jリーグ" checked /><span class="dot Jリーグ"></span>Jリーグ</label>
+        <label><input type="checkbox" data-genre="その他" checked /><span class="dot その他"></span>その他</label>
+      </div>
+      <div class="spacer"></div>
+      <a class="nav" href="grid.html">グリッド表示 →</a>
+    </header>
+    <div class="main">
+      <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+      const GENRE_COLOR = { NPB: "#2563eb", KBO: "#ea580c", CPBL: "#dc2626", Jリーグ: "#16a34a", その他: "#64748b" };
+
+      const map = L.map("map").setView([26.35, 127.85], 10);
+      // Esri World Street Map: a free, colorful basemap that does not
+      // require an API key/account.
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+        maxZoom: 19,
+        attribution: "Tiles &copy; Esri &mdash; Source: Esri, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, Esri China (Hong Kong), Esri Korea, Esri (Thailand), NGCC, (c) OpenStreetMap contributors, and the GIS User Community",
+      }).addTo(map);
+
+      const markerLayer = L.layerGroup().addTo(map);
+      let itemsCache = [];
+      let hiddenGenres = new Set();
+
+      function esc(s) {
+        return (s == null ? "" : String(s)).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+      }
+
+      function icon(genre) {
+        const color = GENRE_COLOR[genre] || GENRE_COLOR["その他"];
+        return L.divIcon({
+          className: "",
+          html:
+            '<div style="width:16px;height:16px;border-radius:50%;background:' +
+            color +
+            ';border:2px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.5);"></div>',
+          iconSize: [16, 16],
+          iconAnchor: [8, 8],
+          popupAnchor: [0, -8],
+        });
+      }
+
+      function dateRange(it) {
+        const s = it.startDate || "";
+        const e = it.endDate || "";
+        if (!s && !e) return "";
+        return s + (e && e !== s ? " 〜 " + e : "");
+      }
+
+      function popupViewHtml(it) {
+        const badge = GENRE_COLOR[it.genre] || GENRE_COLOR["その他"];
+        let html = '<div class="lp">';
+        html += '<div class="title">' + esc(it.name || it.id) + "</div>";
+        html += '<div class="badge" style="background:' + badge + '">' + esc(it.genre || "") + "</div>";
+        if (it.municipality || it.venue) html += '<div class="row"><b>場所:</b> ' + esc(it.municipality || "") + (it.venue ? " / " + esc(it.venue) : "") + "</div>";
+        const dr = dateRange(it);
+        if (dr) html += '<div class="row"><b>日程:</b> ' + esc(dr) + "</div>";
+        if (it.publicInfo) html += '<div class="row"><b>公開/料金:</b> ' + esc(it.publicInfo) + "</div>";
+        if (it.parking) html += '<div class="row"><b>駐車場:</b> ' + esc(it.parking) + "</div>";
+        if (it.official) html += '<div class="row"><b>公式:</b> <a href="' + esc(it.official) + '" target="_blank" rel="noopener">サイトを開く</a></div>';
+        if (it.sns) html += '<div class="row"><b>SNS:</b> <a href="' + esc(it.sns) + '" target="_blank" rel="noopener">開く</a></div>';
+        html += "</div>";
+        return html;
+      }
+
+      function jitterKey(it) {
+        return Math.round(it.lat * 2000) + "," + Math.round(it.lng * 2000);
+      }
+
+      function renderMarkers(items) {
+        markerLayer.clearLayers();
+        const withCoords = items.filter((it) => typeof it.lat === "number" && typeof it.lng === "number" && !isNaN(it.lat) && !isNaN(it.lng));
+        // jitter identical coordinates so overlapping pins (same venue) are all visible
+        const groups = {};
+        for (const it of withCoords) {
+          const key = jitterKey(it);
+          (groups[key] = groups[key] || []).push(it);
+        }
+        for (const key in groups) {
+          const group = groups[key];
+          const n = group.length;
+          group.forEach((it, i) => {
+            let lat = it.lat;
+            let lng = it.lng;
+            if (n > 1) {
+              const angle = (2 * Math.PI * i) / n;
+              lat += Math.cos(angle) * 0.0018;
+              lng += Math.sin(angle) * 0.0018;
+            }
+            if (hiddenGenres.has(it.genre)) return;
+            const marker = L.marker([lat, lng], { icon: icon(it.genre) });
+            marker.bindPopup(popupViewHtml(it), { maxWidth: 280 });
+            marker.addTo(markerLayer);
+          });
+        }
+      }
+
+      document.getElementById("legend").addEventListener("change", (e) => {
+        const cb = e.target.closest("input[data-genre]");
+        if (!cb) return;
+        if (cb.checked) hiddenGenres.delete(cb.dataset.genre);
+        else hiddenGenres.add(cb.dataset.genre);
+        renderMarkers(itemsCache);
+      });
+
+      async function load() {
+        const res = await fetch("data.json");
+        if (!res.ok) throw new Error("読み込み失敗 (" + res.status + ")");
+        return res.json();
+      }
+
+      async function main() {
+        itemsCache = await load();
+        renderMarkers(itemsCache);
+      }
+
+      main().catch((e) => {
+        document.getElementById("map").innerHTML = '<div class="err">読み込みに失敗しました: ' + esc(e.message) + "</div>";
+      });
+    </script>
+  </body>
+</html>
