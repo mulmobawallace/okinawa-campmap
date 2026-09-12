@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
       :root {
@@ -140,6 +141,27 @@
       }
       .lp a {
         color: #2563eb;
+      }
+
+      /* --- Mobile layout --- */
+      @media (max-width: 600px) {
+        header {
+          padding: 8px 10px;
+          gap: 8px;
+        }
+        header h1 {
+          font-size: 13px;
+        }
+        .legend {
+          gap: 6px;
+          font-size: 11px;
+          order: 3;
+          width: 100%;
+        }
+        header a.nav {
+          font-size: 13px;
+          padding: 7px 14px;
+        }
       }
     </style>
   </head>
