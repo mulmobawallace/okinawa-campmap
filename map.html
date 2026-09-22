@@ -60,6 +60,20 @@
       header a.nav:hover {
         background: #1d4ed8;
       }
+      header a.home {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+        text-decoration: none;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 8px 14px;
+        white-space: nowrap;
+      }
+      header a.home:hover {
+        color: var(--ink);
+        border-color: var(--ink);
+      }
       .legend {
         display: flex;
         gap: 10px;
@@ -158,6 +172,10 @@
           order: 3;
           width: 100%;
         }
+        header a.home {
+          font-size: 12px;
+          padding: 6px 12px;
+        }
         header a.nav {
           font-size: 13px;
           padding: 7px 14px;
@@ -176,6 +194,7 @@
         <label><input type="checkbox" data-genre="その他" checked /><span class="dot その他"></span>その他</label>
       </div>
       <div class="spacer"></div>
+      <a class="home" href="index.html">🏠 トップ</a>
       <a class="nav" href="grid.html">🗂️ グリッド表示</a>
     </header>
     <div class="main">

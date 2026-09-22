@@ -3,10 +3,282 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="refresh" content="0; url=grid.html" />
-    <title>沖縄キャンプまとめ</title>
+    <title>沖縄キャンプまとめ 2026</title>
+    <style>
+      :root {
+        --npb: #3b82f6;
+        --kbo: #fb923c;
+        --cpbl: #f87171;
+        --jleague: #34d399;
+        --ink: #e5e7eb;
+        --muted: #8b95a5;
+        --bg: #08090b;
+        --card-bg: #131418;
+        --line: #26282f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        min-height: 100%;
+      }
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", sans-serif;
+        color: var(--ink);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-x: hidden;
+        position: relative;
+      }
+      /* decorative glow blobs, evoking stadium floodlights */
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        width: 60vmax;
+        height: 60vmax;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.18;
+        z-index: 0;
+        pointer-events: none;
+      }
+      body::before {
+        background: var(--npb);
+        top: -20vmax;
+        left: -15vmax;
+      }
+      body::after {
+        background: var(--jleague);
+        bottom: -25vmax;
+        right: -15vmax;
+      }
+      .bg-icons {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+      .bg-icons span {
+        position: absolute;
+        font-size: 42px;
+        opacity: 0.06;
+        filter: grayscale(1);
+      }
+      main {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 880px;
+        padding: 56px 20px 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .badge-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 18px;
+      }
+      .badge {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        padding: 4px 12px;
+        border-radius: 999px;
+        color: #fff;
+      }
+      .badge.NPB {
+        background: var(--npb);
+      }
+      .badge.KBO {
+        background: var(--kbo);
+      }
+      .badge.CPBL {
+        background: var(--cpbl);
+      }
+      .badge.Jリーグ {
+        background: var(--jleague);
+        color: #04140c;
+      }
+      h1 {
+        font-size: clamp(30px, 6vw, 52px);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        margin: 0 0 10px;
+        color: #fff;
+        text-shadow: 0 0 30px rgba(59, 130, 246, 0.45);
+        line-height: 1.15;
+      }
+      h1 .accent {
+        background: linear-gradient(90deg, var(--npb), var(--jleague));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .sub {
+        font-size: 15px;
+        color: var(--muted);
+        max-width: 520px;
+        line-height: 1.7;
+        margin: 0 0 40px;
+      }
+      .count {
+        font-weight: 800;
+        color: #fff;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        width: 100%;
+      }
+      .card-link {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        color: var(--ink);
+        background: var(--card-bg);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 36px 22px 30px;
+        overflow: hidden;
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.15s ease;
+      }
+      .card-link::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        z-index: -1;
+      }
+      .card-link.map {
+        border-color: rgba(59, 130, 246, 0.3);
+      }
+      .card-link.map::before {
+        background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.25), transparent 70%);
+      }
+      .card-link.grid {
+        border-color: rgba(52, 211, 153, 0.3);
+      }
+      .card-link.grid::before {
+        background: radial-gradient(circle at 50% 0%, rgba(52, 211, 153, 0.25), transparent 70%);
+      }
+      .card-link:hover {
+        transform: translateY(-4px);
+      }
+      .card-link:hover::before {
+        opacity: 1;
+      }
+      .card-link.map:hover {
+        border-color: var(--npb);
+        box-shadow: 0 0 30px -6px var(--npb);
+      }
+      .card-link.grid:hover {
+        border-color: var(--jleague);
+        box-shadow: 0 0 30px -6px var(--jleague);
+      }
+      .card-icon {
+        font-size: 44px;
+        line-height: 1;
+      }
+      .card-title {
+        font-size: 19px;
+        font-weight: 800;
+        color: #fff;
+      }
+      .card-desc {
+        font-size: 12.5px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .card-cta {
+        margin-top: 6px;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 8px 20px;
+        border-radius: 999px;
+        color: #fff;
+      }
+      .card-link.map .card-cta {
+        background: var(--npb);
+      }
+      .card-link.grid .card-cta {
+        background: var(--jleague);
+        color: #04140c;
+      }
+      footer {
+        position: relative;
+        z-index: 1;
+        margin-top: auto;
+        padding: 20px;
+        font-size: 11px;
+        color: var(--muted);
+        text-align: center;
+      }
+      @media (max-width: 640px) {
+        .cards {
+          grid-template-columns: 1fr;
+        }
+        main {
+          padding: 40px 18px 40px;
+        }
+      }
+    </style>
   </head>
   <body>
-    <p><a href="grid.html">沖縄キャンプまとめ（グリッド表示）へ</a></p>
+    <div class="bg-icons" aria-hidden="true">
+      <span style="top:8%;left:6%;">⚾</span>
+      <span style="top:18%;right:10%;">⚽</span>
+      <span style="bottom:14%;left:12%;">⚾</span>
+      <span style="bottom:22%;right:8%;">⚾</span>
+      <span style="top:55%;left:2%;">⚽</span>
+      <span style="top:65%;right:4%;">⚾</span>
+    </div>
+
+    <main>
+      <div class="badge-row">
+        <span class="badge NPB">NPB</span>
+        <span class="badge KBO">KBO</span>
+        <span class="badge CPBL">CPBL</span>
+        <span class="badge Jリーグ">Jリーグ</span>
+      </div>
+      <h1>沖縄キャンプ<span class="accent">まとめ 2026</span></h1>
+      <p class="sub">
+        プロ野球（NPB・KBO・CPBL）と J リーグ、<span class="count">28チーム</span>の沖縄春季キャンプ情報を1つに集約。
+        開催市町村・球場・日程・駐車場情報まで、まとめてチェックできます。
+      </p>
+
+      <div class="cards">
+        <a class="card-link map" href="map.html">
+          <div class="card-icon">🗺️</div>
+          <div class="card-title">地図で見る</div>
+          <div class="card-desc">市町村ごとにピン表示。<br />タップして球場・日程をすぐ確認</div>
+          <span class="card-cta">MAP を開く</span>
+        </a>
+        <a class="card-link grid" href="grid.html">
+          <div class="card-icon">🗂️</div>
+          <div class="card-title">一覧で見る</div>
+          <div class="card-desc">ジャンル別・月別で切り替え可能な<br />カード一覧</div>
+          <span class="card-cta">LIST を開く</span>
+        </a>
+      </div>
+    </main>
+
+    <footer>沖縄キャンプまとめ &middot; データは公開情報をもとに作成</footer>
   </body>
 </html>

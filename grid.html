@@ -69,6 +69,20 @@
         background: #2563eb;
         box-shadow: 0 0 20px -1px rgba(59, 130, 246, 0.9);
       }
+      header a.home {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+        text-decoration: none;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 8px 14px;
+        white-space: nowrap;
+      }
+      header a.home:hover {
+        color: #fff;
+        border-color: #fff;
+      }
       .chips {
         display: flex;
         gap: 8px;
@@ -371,16 +385,21 @@
           font-size: 17px;
           width: 100%;
         }
+        header a.home {
+          font-size: 12px;
+          padding: 6px 12px;
+          order: 1;
+        }
         header a.nav {
           font-size: 13px;
           padding: 8px 16px;
-          order: 1;
-        }
-        .mode-toggle {
           order: 2;
         }
-        .chips {
+        .mode-toggle {
           order: 3;
+        }
+        .chips {
+          order: 4;
           width: 100%;
         }
         .chip {
@@ -419,6 +438,7 @@
         <button class="chip その他 on" data-genre="その他">その他</button>
       </div>
       <div style="flex:1"></div>
+      <a class="home" href="index.html">🏠 トップ</a>
       <a class="nav" href="map.html">🗺️ 地図表示</a>
 
     </header>
