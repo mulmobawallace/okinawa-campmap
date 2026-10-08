@@ -186,6 +186,7 @@
   <body>
     <header>
       <h1>沖縄キャンプ地図</h1>
+      <select id="yearSelect" title="年度" style="font-size: 13px; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1"></select>
       <div class="legend" id="legend">
         <label><input type="checkbox" data-genre="NPB" checked /><span class="dot NPB"></span>NPB</label>
         <label><input type="checkbox" data-genre="KBO" checked /><span class="dot KBO"></span>KBO</label>
@@ -262,7 +263,30 @@
         return Math.round(it.lat * 2000) + "," + Math.round(it.lng * 2000);
       }
 
-      function renderMarkers(items) {
+      let activeYear = null; // null = 最新年度を自動選択
+
+      function yearOf(it) {
+        if (it.year) return Number(it.year);
+        const d = it.startDate || it.endDate;
+        return d ? parseInt(String(d).slice(0, 4), 10) : null;
+      }
+
+      function renderYearSelect(items) {
+        const years = [...new Set(items.map(yearOf).filter(Boolean))].sort((a, b) => b - a);
+        if (activeYear == null || !years.includes(activeYear)) activeYear = years[0] || null;
+        const sel = document.getElementById("yearSelect");
+        sel.style.display = years.length ? "" : "none";
+        sel.innerHTML = years.map((y) => '<option value="' + y + '"' + (y === activeYear ? " selected" : "") + ">" + y + "年</option>").join("");
+      }
+
+      document.getElementById("yearSelect").addEventListener("change", (e) => {
+        activeYear = Number(e.target.value);
+        renderMarkers(itemsCache);
+      });
+
+      function renderMarkers(allItems) {
+        renderYearSelect(allItems);
+        const items = allItems.filter((it) => activeYear == null || yearOf(it) === activeYear);
         markerLayer.clearLayers();
         const withCoords = items.filter((it) => typeof it.lat === "number" && typeof it.lng === "number" && !isNaN(it.lat) && !isNaN(it.lng));
         // jitter identical coordinates so overlapping pins (same venue) are all visible

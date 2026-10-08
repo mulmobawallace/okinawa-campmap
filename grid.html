@@ -426,6 +426,7 @@
   <body>
     <header>
       <h1>沖縄キャンプ図鑑</h1>
+      <div class="mode-toggle" id="yearToggle"></div>
       <div class="mode-toggle" id="modeToggle">
         <button class="mode-btn on" data-mode="genre">ジャンル別</button>
         <button class="mode-btn" data-mode="month">月別</button>
@@ -457,6 +458,23 @@
       let itemsCache = [];
       let itemsById = {};
       let groupMode = "genre"; // "genre" | "month"
+      let activeYear = null; // null = 最新年度を自動選択
+
+      function yearOf(it) {
+        if (it.year) return Number(it.year);
+        const d = it.startDate || it.endDate;
+        return d ? parseInt(String(d).slice(0, 4), 10) : null;
+      }
+
+      function renderYearToggle(items) {
+        const years = [...new Set(items.map(yearOf).filter(Boolean))].sort((a, b) => b - a);
+        if (activeYear == null || !years.includes(activeYear)) activeYear = years[0] || null;
+        const el = document.getElementById("yearToggle");
+        el.style.display = years.length ? "" : "none";
+        el.innerHTML = years
+          .map((y) => '<button class="mode-btn' + (y === activeYear ? " on" : "") + '" data-year="' + y + '">' + y + "年</button>")
+          .join("");
+      }
 
       function esc(s) {
         return (s == null ? "" : String(s)).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -510,7 +528,8 @@
           main.innerHTML = '<div class="empty">レコードがありません</div>';
           return;
         }
-        const visible = items.filter((it) => activeGenres.has(GENRE_ORDER.includes(it.genre) ? it.genre : "その他"));
+        renderYearToggle(items);
+        const visible = items.filter((it) => (activeYear == null || yearOf(it) === activeYear) && activeGenres.has(GENRE_ORDER.includes(it.genre) ? it.genre : "その他"));
 
         let html = "";
         if (groupMode === "genre") {
@@ -576,7 +595,14 @@
         const btn = e.target.closest(".mode-btn");
         if (!btn || btn.classList.contains("on")) return;
         groupMode = btn.dataset.mode;
-        document.querySelectorAll(".mode-btn").forEach((b) => b.classList.toggle("on", b === btn));
+        document.querySelectorAll("#modeToggle .mode-btn").forEach((b) => b.classList.toggle("on", b === btn));
+        render(itemsCache);
+      });
+
+      document.getElementById("yearToggle").addEventListener("click", (e) => {
+        const btn = e.target.closest(".mode-btn");
+        if (!btn || btn.classList.contains("on")) return;
+        activeYear = Number(btn.dataset.year);
         render(itemsCache);
       });
 
