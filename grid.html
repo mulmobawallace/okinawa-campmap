@@ -314,10 +314,15 @@
         text-decoration: underline;
         opacity: 1;
       }
-      .cal-grid {
+      .cal-month {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .cal-weekrow-header {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        gap: 6px;
+        margin-bottom: 2px;
       }
       .cal-weekday {
         text-align: center;
@@ -326,65 +331,53 @@
         color: var(--muted);
         padding-bottom: 2px;
       }
-      .cal-cell {
-        background: var(--card-bg);
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        min-height: 78px;
-        padding: 4px;
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
+      .cal-week {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        column-gap: 4px;
+        row-gap: 2px;
+        padding-bottom: 8px;
+        margin-bottom: 4px;
+        border-bottom: 1px solid var(--line);
       }
-      .cal-cell.empty {
-        background: transparent;
-        border: none;
-      }
-      .cal-cell.today {
-        border-color: #fff;
-      }
-      .cal-day {
-        font-size: 11px;
+      .cal-daynum {
+        grid-row: 1;
+        font-size: 10.5px;
         font-weight: 700;
         color: var(--muted);
+        padding-left: 2px;
       }
-      .cal-events {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        overflow: hidden;
+      .cal-daynum.out {
+        opacity: 0.3;
       }
-      .cal-chip {
-        font-size: 10px;
+      .cal-bar {
+        font-size: 10.5px;
         font-weight: 700;
         color: #fff;
         border-radius: 4px;
-        padding: 1px 4px;
+        padding: 1px 7px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         cursor: pointer;
+        display: flex;
+        align-items: center;
       }
-      .cal-chip.NPB {
+      .cal-bar.NPB {
         background: var(--npb);
       }
-      .cal-chip.KBO {
+      .cal-bar.KBO {
         background: var(--kbo);
       }
-      .cal-chip.CPBL {
+      .cal-bar.CPBL {
         background: var(--cpbl);
       }
-      .cal-chip.Jリーグ {
+      .cal-bar.Jリーグ {
         background: var(--jleague);
         color: #04140c;
       }
-      .cal-chip.その他 {
+      .cal-bar.その他 {
         background: var(--other);
-      }
-      .cal-more {
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--muted);
       }
       .empty,
       .err {
@@ -492,20 +485,15 @@
           padding: 16px;
           max-width: 100%;
         }
-        .cal-grid {
-          gap: 3px;
+        .cal-week {
+          column-gap: 2px;
         }
-        .cal-cell {
-          min-height: 56px;
-          padding: 2px;
-          border-radius: 6px;
-        }
-        .cal-day {
+        .cal-daynum {
           font-size: 9px;
         }
-        .cal-chip {
+        .cal-bar {
           font-size: 8.5px;
-          padding: 1px 2px;
+          padding: 1px 3px;
         }
         .cal-weekday {
           font-size: 9px;
@@ -615,54 +603,147 @@
         return new Date(year, month, 0).getDate();
       }
 
-      function firstWeekday(year, month) {
-        return new Date(year, month - 1, 1).getDay();
+      function parseISO(s) {
+        return new Date(s + "T00:00:00");
       }
 
-      // Walks every calendar day from startStr to endStr (inclusive, ISO
-      // "YYYY-MM-DD" strings) and invokes cb(year, month, day) for each.
-      function iterateDates(startStr, endStr, cb) {
-        const d = new Date(startStr + "T00:00:00");
-        const end = new Date((endStr || startStr) + "T00:00:00");
+      function formatMD(dateStr) {
+        const parts = String(dateStr).split("-");
+        return parseInt(parts[1], 10) + "/" + parseInt(parts[2], 10);
+      }
+
+      // "1/11〜1/25"-style compact range label for an item's camp period.
+      function rangeLabel(it) {
+        const s = formatMD(it.startDate);
+        if (!it.endDate || it.endDate === it.startDate) return s;
+        return s + "〜" + formatMD(it.endDate);
+      }
+
+      // Every year-month ("YYYY-MM") an item's [startDate, endDate] range touches.
+      function monthsForItem(it) {
+        const s = parseISO(it.startDate);
+        const e = parseISO(it.endDate || it.startDate);
+        const keys = [];
+        let y = s.getFullYear();
+        let m = s.getMonth() + 1;
+        const endY = e.getFullYear();
+        const endM = e.getMonth() + 1;
         let guard = 0;
-        while (d <= end && guard < 366) {
-          cb(d.getFullYear(), d.getMonth() + 1, d.getDate());
-          d.setDate(d.getDate() + 1);
+        while ((y < endY || (y === endY && m <= endM)) && guard < 36) {
+          keys.push(y + "-" + pad2(m));
+          m++;
+          if (m > 12) {
+            m = 1;
+            y++;
+          }
           guard++;
         }
+        return keys;
       }
 
-      function calendarHtml(year, month, dayIndex) {
-        const first = firstWeekday(year, month);
-        const total = daysInMonth(year, month);
-        const monthIds = new Set();
-        let cells = WEEKDAY_LABELS.map((w) => '<div class="cal-weekday">' + w + "</div>").join("");
-        for (let i = 0; i < first; i++) cells += '<div class="cal-cell empty"></div>';
-        for (let day = 1; day <= total; day++) {
-          const key = year + "-" + pad2(month) + "-" + pad2(day);
-          const items = dayIndex[key] || [];
-          items.forEach((it) => monthIds.add(it.id));
-          const shown = items.slice(0, 3);
-          let inner = '<div class="cal-day">' + day + "</div>";
-          inner += '<div class="cal-events">';
-          inner += shown
-            .map((it) => {
-              const g = GENRE_ORDER.includes(it.genre) ? it.genre : "その他";
-              return '<div class="cal-chip ' + g + '" data-id="' + esc(it.id) + '" title="' + esc(it.name || it.id) + '">' + esc(it.name || it.id) + "</div>";
-            })
-            .join("");
-          if (items.length > 3) inner += '<div class="cal-more">+' + (items.length - 3) + "</div>";
-          inner += "</div>";
-          cells += '<div class="cal-cell">' + inner + "</div>";
+      // Full Sun-Sat weeks covering the given month, as arrays of 7 Date objects
+      // (weeks at the start/end of the month include days from the adjacent month).
+      function buildWeeks(year, month) {
+        const firstOfMonth = new Date(year, month - 1, 1);
+        const gridStart = new Date(year, month - 1, 1 - firstOfMonth.getDay());
+        const lastOfMonth = new Date(year, month - 1, daysInMonth(year, month));
+        const weeks = [];
+        let cursor = new Date(gridStart);
+        let guard = 0;
+        while (guard < 10) {
+          const week = [];
+          for (let i = 0; i < 7; i++) {
+            week.push(new Date(cursor));
+            cursor.setDate(cursor.getDate() + 1);
+          }
+          weeks.push(week);
+          if (week[6] >= lastOfMonth) break;
+          guard++;
         }
-        const totalCells = first + total;
-        const trailing = (7 - (totalCells % 7)) % 7;
-        for (let i = 0; i < trailing; i++) cells += '<div class="cal-cell empty"></div>';
+        return weeks;
+      }
+
+      // Renders one month as a real calendar: each camp period becomes a single
+      // bar spanning its start/end days, wrapping onto a new row per week and
+      // stacking into lanes when multiple camps overlap the same days.
+      function calendarHtml(year, month, items) {
+        const weeks = buildWeeks(year, month);
+        const monthIds = new Set();
+        let weeksHtml = "";
+
+        for (const week of weeks) {
+          const weekStart = week[0];
+          const weekEnd = week[6];
+          const events = [];
+          for (const it of items) {
+            const s = parseISO(it.startDate);
+            const e = parseISO(it.endDate || it.startDate);
+            if (e < weekStart || s > weekEnd) continue;
+            const segStart = s < weekStart ? weekStart : s;
+            const segEnd = e > weekEnd ? weekEnd : e;
+            const colStart = Math.round((segStart - weekStart) / 86400000);
+            const colEnd = Math.round((segEnd - weekStart) / 86400000);
+            events.push({ it, colStart, colEnd });
+            monthIds.add(it.id);
+          }
+          // Lane assignment: earliest-starting / longest events get priority,
+          // each lane keeps the rightmost column it is occupied through.
+          events.sort((a, b) => a.colStart - b.colStart || b.colEnd - b.colStart - (a.colEnd - a.colStart));
+          const laneEnd = [];
+          for (const ev of events) {
+            let placed = false;
+            for (let L = 0; L < laneEnd.length; L++) {
+              if (laneEnd[L] < ev.colStart) {
+                laneEnd[L] = ev.colEnd;
+                ev.lane = L;
+                placed = true;
+                break;
+              }
+            }
+            if (!placed) {
+              ev.lane = laneEnd.length;
+              laneEnd.push(ev.colEnd);
+            }
+          }
+
+          let dayNumsHtml = "";
+          week.forEach((d, i) => {
+            const inMonth = d.getMonth() + 1 === month;
+            dayNumsHtml += '<div class="cal-daynum' + (inMonth ? "" : " out") + '" style="grid-column:' + (i + 1) + '">' + d.getDate() + "</div>";
+          });
+
+          let barsHtml = "";
+          for (const ev of events) {
+            const g = GENRE_ORDER.includes(ev.it.genre) ? ev.it.genre : "その他";
+            const label = esc(ev.it.name || ev.it.id) + " " + esc(rangeLabel(ev.it));
+            barsHtml +=
+              '<div class="cal-bar ' +
+              g +
+              '" data-id="' +
+              esc(ev.it.id) +
+              '" title="' +
+              esc(ev.it.name || ev.it.id) +
+              " " +
+              esc(rangeLabel(ev.it)) +
+              '" style="grid-column:' +
+              (ev.colStart + 1) +
+              " / " +
+              (ev.colEnd + 2) +
+              "; grid-row:" +
+              (ev.lane + 2) +
+              ';">' +
+              label +
+              "</div>";
+          }
+
+          const laneCount = Math.max(laneEnd.length, 1);
+          weeksHtml +=
+            '<div class="cal-week" style="grid-template-rows: 15px repeat(' + laneCount + ', 18px);">' + dayNumsHtml + barsHtml + "</div>";
+        }
 
         let html = '<section class="genre-section">';
-        html +=
-          '<div class="genre-title"><span class="bar month"></span>' + month + '月 <span class="count">' + monthIds.size + "件</span></div>";
-        html += '<div class="cal-grid">' + cells + "</div>";
+        html += '<div class="genre-title"><span class="bar month"></span>' + month + '月 <span class="count">' + monthIds.size + "件</span></div>";
+        html += '<div class="cal-month"><div class="cal-weekrow-header">' + WEEKDAY_LABELS.map((w) => '<div class="cal-weekday">' + w + "</div>").join("") + "</div>" + weeksHtml + "</div>";
         html += "</section>";
         return html;
       }
@@ -688,29 +769,20 @@
             html += sectionHtml(bar, g, list);
           }
         } else {
-          const dayIndex = {}; // "YYYY-MM-DD" -> items active that day
-          const monthKeys = new Set(); // "YYYY-MM"
+          const dated = [];
           const none = [];
-          for (const it of visible) {
-            if (!it.startDate) {
-              none.push(it);
-              continue;
-            }
-            iterateDates(it.startDate, it.endDate || it.startDate, (y, m, d) => {
-              const key = y + "-" + pad2(m) + "-" + pad2(d);
-              (dayIndex[key] = dayIndex[key] || []).push(it);
-              monthKeys.add(y + "-" + pad2(m));
-            });
-          }
+          for (const it of visible) (it.startDate ? dated : none).push(it);
+          const monthKeys = new Set();
+          for (const it of dated) monthsForItem(it).forEach((k) => monthKeys.add(k));
           const sortedMonths = [...monthKeys].sort();
           for (const key of sortedMonths) {
             const [y, m] = key.split("-").map(Number);
-            html += calendarHtml(y, m, dayIndex);
+            html += calendarHtml(y, m, dated);
           }
           if (none.length) html += sectionHtml('<span class="bar month"></span>', "日程未定", none);
         }
         main.innerHTML = html || '<div class="empty">該当するチームがありません</div>';
-        main.querySelectorAll(".card, .cal-chip").forEach((el) => {
+        main.querySelectorAll(".card, .cal-bar").forEach((el) => {
           el.onclick = () => openDetail(el.dataset.id);
         });
       }
