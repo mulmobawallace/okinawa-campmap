@@ -314,6 +314,78 @@
         text-decoration: underline;
         opacity: 1;
       }
+      .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+      }
+      .cal-weekday {
+        text-align: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        padding-bottom: 2px;
+      }
+      .cal-cell {
+        background: var(--card-bg);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        min-height: 78px;
+        padding: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .cal-cell.empty {
+        background: transparent;
+        border: none;
+      }
+      .cal-cell.today {
+        border-color: #fff;
+      }
+      .cal-day {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+      }
+      .cal-events {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        overflow: hidden;
+      }
+      .cal-chip {
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+        border-radius: 4px;
+        padding: 1px 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+      }
+      .cal-chip.NPB {
+        background: var(--npb);
+      }
+      .cal-chip.KBO {
+        background: var(--kbo);
+      }
+      .cal-chip.CPBL {
+        background: var(--cpbl);
+      }
+      .cal-chip.Jリーグ {
+        background: var(--jleague);
+        color: #04140c;
+      }
+      .cal-chip.その他 {
+        background: var(--other);
+      }
+      .cal-more {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--muted);
+      }
       .empty,
       .err {
         padding: 40px 20px;
@@ -420,6 +492,24 @@
           padding: 16px;
           max-width: 100%;
         }
+        .cal-grid {
+          gap: 3px;
+        }
+        .cal-cell {
+          min-height: 56px;
+          padding: 2px;
+          border-radius: 6px;
+        }
+        .cal-day {
+          font-size: 9px;
+        }
+        .cal-chip {
+          font-size: 8.5px;
+          padding: 1px 2px;
+        }
+        .cal-weekday {
+          font-size: 9px;
+        }
       }
     </style>
   </head>
@@ -429,7 +519,7 @@
       <div class="mode-toggle" id="yearToggle"></div>
       <div class="mode-toggle" id="modeToggle">
         <button class="mode-btn on" data-mode="genre">ジャンル別</button>
-        <button class="mode-btn" data-mode="month">月別</button>
+        <button class="mode-btn" data-mode="month">カレンダー</button>
       </div>
       <div class="chips" id="chips">
         <button class="chip NPB on" data-genre="NPB">NPB</button>
@@ -506,18 +596,73 @@
         return html;
       }
 
-      function monthOf(it) {
-        const d = it.startDate || it.endDate;
-        if (!d) return null;
-        const m = parseInt(String(d).slice(5, 7), 10);
-        return m >= 1 && m <= 12 ? m : null;
-      }
-
       function sectionHtml(barHtml, titleText, list) {
         list.sort((a, b) => (a.startDate || "").localeCompare(b.startDate || ""));
         let html = '<section class="genre-section">';
         html += '<div class="genre-title">' + barHtml + esc(titleText) + ' <span class="count">' + list.length + "件</span></div>";
         html += '<div class="grid">' + list.map(cardHtml).join("") + "</div>";
+        html += "</section>";
+        return html;
+      }
+
+      const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
+
+      function pad2(n) {
+        return n < 10 ? "0" + n : "" + n;
+      }
+
+      function daysInMonth(year, month) {
+        return new Date(year, month, 0).getDate();
+      }
+
+      function firstWeekday(year, month) {
+        return new Date(year, month - 1, 1).getDay();
+      }
+
+      // Walks every calendar day from startStr to endStr (inclusive, ISO
+      // "YYYY-MM-DD" strings) and invokes cb(year, month, day) for each.
+      function iterateDates(startStr, endStr, cb) {
+        const d = new Date(startStr + "T00:00:00");
+        const end = new Date((endStr || startStr) + "T00:00:00");
+        let guard = 0;
+        while (d <= end && guard < 366) {
+          cb(d.getFullYear(), d.getMonth() + 1, d.getDate());
+          d.setDate(d.getDate() + 1);
+          guard++;
+        }
+      }
+
+      function calendarHtml(year, month, dayIndex) {
+        const first = firstWeekday(year, month);
+        const total = daysInMonth(year, month);
+        const monthIds = new Set();
+        let cells = WEEKDAY_LABELS.map((w) => '<div class="cal-weekday">' + w + "</div>").join("");
+        for (let i = 0; i < first; i++) cells += '<div class="cal-cell empty"></div>';
+        for (let day = 1; day <= total; day++) {
+          const key = year + "-" + pad2(month) + "-" + pad2(day);
+          const items = dayIndex[key] || [];
+          items.forEach((it) => monthIds.add(it.id));
+          const shown = items.slice(0, 3);
+          let inner = '<div class="cal-day">' + day + "</div>";
+          inner += '<div class="cal-events">';
+          inner += shown
+            .map((it) => {
+              const g = GENRE_ORDER.includes(it.genre) ? it.genre : "その他";
+              return '<div class="cal-chip ' + g + '" data-id="' + esc(it.id) + '" title="' + esc(it.name || it.id) + '">' + esc(it.name || it.id) + "</div>";
+            })
+            .join("");
+          if (items.length > 3) inner += '<div class="cal-more">+' + (items.length - 3) + "</div>";
+          inner += "</div>";
+          cells += '<div class="cal-cell">' + inner + "</div>";
+        }
+        const totalCells = first + total;
+        const trailing = (7 - (totalCells % 7)) % 7;
+        for (let i = 0; i < trailing; i++) cells += '<div class="cal-cell empty"></div>';
+
+        let html = '<section class="genre-section">';
+        html +=
+          '<div class="genre-title"><span class="bar month"></span>' + month + '月 <span class="count">' + monthIds.size + "件</span></div>";
+        html += '<div class="cal-grid">' + cells + "</div>";
         html += "</section>";
         return html;
       }
@@ -543,23 +688,29 @@
             html += sectionHtml(bar, g, list);
           }
         } else {
-          const byMonth = {};
-          for (let m = 1; m <= 12; m++) byMonth[m] = [];
+          const dayIndex = {}; // "YYYY-MM-DD" -> items active that day
+          const monthKeys = new Set(); // "YYYY-MM"
           const none = [];
           for (const it of visible) {
-            const m = monthOf(it);
-            if (m) byMonth[m].push(it);
-            else none.push(it);
+            if (!it.startDate) {
+              none.push(it);
+              continue;
+            }
+            iterateDates(it.startDate, it.endDate || it.startDate, (y, m, d) => {
+              const key = y + "-" + pad2(m) + "-" + pad2(d);
+              (dayIndex[key] = dayIndex[key] || []).push(it);
+              monthKeys.add(y + "-" + pad2(m));
+            });
           }
-          const bar = '<span class="bar month"></span>';
-          for (let m = 1; m <= 12; m++) {
-            if (!byMonth[m].length) continue;
-            html += sectionHtml(bar, m + "月", byMonth[m]);
+          const sortedMonths = [...monthKeys].sort();
+          for (const key of sortedMonths) {
+            const [y, m] = key.split("-").map(Number);
+            html += calendarHtml(y, m, dayIndex);
           }
-          if (none.length) html += sectionHtml(bar, "日程未定", none);
+          if (none.length) html += sectionHtml('<span class="bar month"></span>', "日程未定", none);
         }
         main.innerHTML = html || '<div class="empty">該当するチームがありません</div>';
-        main.querySelectorAll(".card").forEach((el) => {
+        main.querySelectorAll(".card, .cal-chip").forEach((el) => {
           el.onclick = () => openDetail(el.dataset.id);
         });
       }
