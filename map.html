@@ -263,7 +263,17 @@
         return Math.round(it.lat * 2000) + "," + Math.round(it.lng * 2000);
       }
 
-      let activeYear = null; // null = 最新年度を自動選択
+      let activeYear = null; // null = defaultYear() で自動選択
+
+      // 初期表示の年度: 今年（日本時間）のデータがあれば今年、なければ今年以前で最新の年度、それもなければ最新の年度。
+      // 例: 2026年中は2026年、2027年1月1日からは2027年が初期表示になる（翌年分を先に登録しても切り替わらない）。
+      function defaultYear(years) {
+        if (!years.length) return null;
+        const thisYear = new Date(Date.now() + 9 * 3600 * 1000).getUTCFullYear();
+        if (years.includes(thisYear)) return thisYear;
+        const past = years.filter((y) => y < thisYear);
+        return past.length ? Math.max(...past) : Math.max(...years);
+      }
 
       function yearOf(it) {
         if (it.year) return Number(it.year);
@@ -273,7 +283,7 @@
 
       function renderYearSelect(items) {
         const years = [...new Set(items.map(yearOf).filter(Boolean))].sort((a, b) => b - a);
-        if (activeYear == null || !years.includes(activeYear)) activeYear = years[0] || null;
+        if (activeYear == null || !years.includes(activeYear)) activeYear = defaultYear(years);
         const sel = document.getElementById("yearSelect");
         sel.style.display = years.length ? "" : "none";
         sel.innerHTML = years.map((y) => '<option value="' + y + '"' + (y === activeYear ? " selected" : "") + ">" + y + "年</option>").join("");
