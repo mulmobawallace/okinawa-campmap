@@ -315,54 +315,293 @@
         text-decoration: underline;
         opacity: 1;
       }
-      .cal-month {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-      .cal-weekrow-header {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        margin-bottom: 2px;
-      }
-      .cal-weekday {
-        text-align: center;
+      /* --- 開催状況（開催中・終了）の表示 --- */
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        align-self: flex-start;
         font-size: 11px;
+        font-weight: 800;
+        border-radius: 999px;
+        padding: 2px 9px;
+        white-space: nowrap;
+      }
+      .status.live {
+        background: rgba(34, 197, 94, 0.16);
+        color: #4ade80;
+        border: 1px solid rgba(74, 222, 128, 0.45);
+      }
+      .status.live::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 8px #4ade80;
+      }
+      .status.soon {
+        background: rgba(148, 163, 184, 0.12);
+        color: #cbd5e1;
+        border: 1px solid var(--line);
+      }
+      .status.ended {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--line);
+      }
+      .card.ended {
+        opacity: 0.42;
+        filter: grayscale(1);
+      }
+      .card.ended:hover {
+        opacity: 0.75;
+      }
+      .live-section .genre-title .bar {
+        background: #4ade80;
+        color: #4ade80;
+      }
+      .sub-label {
+        margin: 18px 0 10px;
+        font-size: 12px;
         font-weight: 700;
         color: var(--muted);
-        padding-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sub-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--line);
+      }
+
+      /* --- カレンダー（1か月表示） --- */
+      .cal-wrap {
+        margin-top: 18px;
+        max-width: 1100px;
+      }
+      .cal-nav {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .cal-nav h2 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 800;
+        color: #fff;
+        min-width: 150px;
+      }
+      .cal-nav .count {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .cal-arrow {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+        background: var(--card-bg);
+        color: #fff;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        line-height: 1;
+      }
+      .cal-arrow:hover:not(:disabled) {
+        border-color: #fff;
+      }
+      .cal-arrow:disabled {
+        opacity: 0.25;
+        cursor: default;
+      }
+      .cal-today-btn {
+        margin-left: auto;
+        border: 1px solid var(--line);
+        background: var(--card-bg);
+        color: var(--ink);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .cal-today-btn:hover {
+        border-color: #fff;
+        color: #fff;
+      }
+      .month-tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      .month-tab {
+        border: 1px solid var(--line);
+        background: var(--card-bg);
+        color: var(--ink);
+        border-radius: 10px;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: baseline;
+        gap: 5px;
+      }
+      .month-tab small {
+        font-size: 10.5px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      .month-tab.past {
+        opacity: 0.4;
+      }
+      .month-tab.now {
+        border-color: rgba(74, 222, 128, 0.6);
+      }
+      .month-tab.now::after {
+        content: "今月";
+        font-size: 10px;
+        color: #4ade80;
+      }
+      .month-tab.on {
+        background: #fff;
+        color: #0a0a0a;
+        opacity: 1;
+        border-color: #fff;
+      }
+      .month-tab.on small {
+        color: #475569;
+      }
+      .legend {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .legend i {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        display: inline-block;
+      }
+      .cal-board {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--card-bg);
+      }
+      .cal-head {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        background: #0e0f12;
+        border-bottom: 1px solid var(--line);
+      }
+      .cal-head div {
+        text-align: center;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--muted);
+        padding: 8px 0;
+      }
+      .cal-head .sun,
+      .cal-day.sun .num {
+        color: #f87171;
+      }
+      .cal-head .sat,
+      .cal-day.sat .num {
+        color: #60a5fa;
       }
       .cal-week {
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        column-gap: 4px;
-        row-gap: 2px;
-        padding-bottom: 8px;
-        margin-bottom: 4px;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        grid-auto-rows: 24px;
+        row-gap: 3px;
+        padding-bottom: 6px;
         border-bottom: 1px solid var(--line);
+        min-height: 84px;
+        position: relative;
       }
-      .cal-daynum {
-        grid-row: 1;
-        font-size: 10.5px;
+      .cal-week:last-child {
+        border-bottom: none;
+      }
+      .cal-day {
+        min-width: 0;
+        border-right: 1px solid var(--line);
+        padding: 4px 6px;
+        margin-bottom: -6px;
+      }
+      .cal-day:nth-child(7) {
+        border-right: none;
+      }
+      .cal-day .num {
+        font-size: 12.5px;
         font-weight: 700;
-        color: var(--muted);
-        padding-left: 2px;
+        color: var(--ink);
       }
-      .cal-daynum.out {
+      .cal-day.out {
+        background: rgba(0, 0, 0, 0.25);
+      }
+      .cal-day.out .num {
         opacity: 0.3;
       }
+      .cal-day.today {
+        background: rgba(74, 222, 128, 0.07);
+      }
+      .cal-day.today .num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #4ade80;
+        color: #052e14 !important;
+      }
       .cal-bar {
-        font-size: 10.5px;
+        z-index: 1;
+        margin: 0 3px;
+        font-size: 12px;
         font-weight: 700;
         color: #fff;
-        border-radius: 4px;
-        padding: 1px 7px;
+        border-radius: 6px;
+        padding: 0 8px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         cursor: pointer;
         display: flex;
         align-items: center;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      }
+      .cal-bar:hover {
+        filter: brightness(1.15);
+      }
+      .cal-bar.cont-left {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        margin-left: 0;
+      }
+      .cal-bar.cont-right {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        margin-right: 0;
+      }
+      .cal-bar.ended {
+        opacity: 0.4;
+        filter: grayscale(0.8);
       }
       .cal-bar.NPB {
         background: var(--npb);
@@ -379,6 +618,72 @@
       }
       .cal-bar.その他 {
         background: var(--other);
+      }
+      .cal-empty {
+        padding: 14px 16px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .cal-list {
+        margin-top: 20px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .cal-list h3 {
+        margin: 0;
+        padding: 10px 14px;
+        font-size: 14px;
+        font-weight: 800;
+        color: #fff;
+        background: #0e0f12;
+        border-bottom: 1px solid var(--line);
+      }
+      .cal-row {
+        display: grid;
+        grid-template-columns: 10px minmax(0, 1fr) auto;
+        gap: 4px 12px;
+        align-items: center;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--line);
+        cursor: pointer;
+        background: var(--card-bg);
+      }
+      .cal-row:last-child {
+        border-bottom: none;
+      }
+      .cal-row:hover {
+        background: #1a1c21;
+      }
+      .cal-row.ended {
+        opacity: 0.45;
+      }
+      .cal-row .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .cal-row .nm {
+        font-size: 14px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .cal-row .where {
+        grid-column: 2;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .cal-row .when {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        text-align: right;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: var(--ink);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
       }
       .empty,
       .err {
@@ -486,18 +791,35 @@
           padding: 16px;
           max-width: 100%;
         }
-        .cal-week {
-          column-gap: 2px;
+        .cal-nav h2 {
+          font-size: 18px;
+          min-width: 0;
         }
-        .cal-daynum {
-          font-size: 9px;
+        .cal-week {
+          grid-auto-rows: 18px;
+          min-height: 64px;
+        }
+        .cal-day {
+          padding: 3px 3px;
+        }
+        .cal-day .num {
+          font-size: 11px;
+        }
+        .cal-day.today .num {
+          width: 18px;
+          height: 18px;
         }
         .cal-bar {
-          font-size: 8.5px;
-          padding: 1px 3px;
+          font-size: 10px;
+          padding: 0 4px;
+          margin: 0 1px;
+          border-radius: 4px;
         }
-        .cal-weekday {
-          font-size: 9px;
+        .cal-head div {
+          font-size: 11px;
+        }
+        .cal-row .nm {
+          font-size: 13px;
         }
       }
     </style>
@@ -576,10 +898,49 @@
         return s + (e && e !== s ? " 〜 " + e : "");
       }
 
+      // 今日の日付（日本時間, YYYY-MM-DD）。開催中・終了の判定と、カレンダーの「今月」に使う。
+      const TODAY = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+
+      // 開催状況: "ongoing"（開催中）/ "upcoming"（これから）/ "ended"（終了）/ "tbd"（日程未定）
+      function statusOf(it) {
+        if (!it.startDate) return "tbd";
+        const end = it.endDate || it.startDate;
+        if (end < TODAY) return "ended";
+        if (it.startDate > TODAY) return "upcoming";
+        return "ongoing";
+      }
+
+      function daysFromToday(dateStr) {
+        return Math.round((parseISO(dateStr) - parseISO(TODAY)) / 86400000);
+      }
+
+      function statusBadge(it) {
+        const st = statusOf(it);
+        if (st === "ongoing") {
+          if (!it.endDate) return '<span class="status live">開催中</span>';
+          const left = daysFromToday(it.endDate);
+          return '<span class="status live">' + (left === 0 ? "開催中・本日まで" : "開催中・残り" + (left + 1) + "日") + "</span>";
+        }
+        if (st === "upcoming") {
+          const d = daysFromToday(it.startDate);
+          return d <= 30 ? '<span class="status soon">あと' + d + "日で開始</span>" : "";
+        }
+        if (st === "ended") return '<span class="status ended">終了</span>';
+        return "";
+      }
+
+      // 並び順: 開催中 → これから（開始日順）→ 日程未定 → 終了（開始日順）
+      const STATUS_RANK = { ongoing: 0, upcoming: 1, tbd: 2, ended: 3 };
+      function byStatusThenDate(a, b) {
+        return STATUS_RANK[statusOf(a)] - STATUS_RANK[statusOf(b)] || (a.startDate || "").localeCompare(b.startDate || "");
+      }
+
       function cardHtml(it) {
         const g = GENRE_ORDER.includes(it.genre) ? it.genre : "その他";
-        let html = '<div class="card ' + g + '" data-id="' + esc(it.id) + '">';
+        const ended = statusOf(it) === "ended";
+        let html = '<div class="card ' + g + (ended ? " ended" : "") + '" data-id="' + esc(it.id) + '">';
         html += '<div class="name">' + esc(it.name || it.id) + "</div>";
+        html += statusBadge(it);
         if (it.municipality) html += '<div class="muni">📍 ' + esc(it.municipality) + "</div>";
         html += '<div class="dates">' + esc(dateRange(it)) + "</div>";
         if (it.venue) html += '<div class="venue">' + esc(it.venue) + "</div>";
@@ -595,11 +956,18 @@
         return html;
       }
 
-      function sectionHtml(barHtml, titleText, list) {
-        list.sort((a, b) => (a.startDate || "").localeCompare(b.startDate || ""));
-        let html = '<section class="genre-section">';
+      // ジャンルなどの1セクション。これからのキャンプを先に、終了したキャンプは「終了したキャンプ」の見出しの下にグレーで並べる。
+      function sectionHtml(barHtml, titleText, list, extraClass) {
+        list.sort(byStatusThenDate);
+        const active = list.filter((it) => statusOf(it) !== "ended");
+        const ended = list.filter((it) => statusOf(it) === "ended");
+        let html = '<section class="genre-section' + (extraClass ? " " + extraClass : "") + '">';
         html += '<div class="genre-title">' + barHtml + esc(titleText) + ' <span class="count">' + list.length + "件</span></div>";
-        html += '<div class="grid">' + list.map(cardHtml).join("") + "</div>";
+        if (active.length) html += '<div class="grid">' + active.map(cardHtml).join("") + "</div>";
+        if (ended.length) {
+          html += '<div class="sub-label">終了したキャンプ（' + ended.length + "件）</div>";
+          html += '<div class="grid">' + ended.map(cardHtml).join("") + "</div>";
+        }
         html += "</section>";
         return html;
       }
@@ -674,12 +1042,10 @@
         return weeks;
       }
 
-      // Renders one month as a real calendar: each camp period becomes a single
-      // bar spanning its start/end days, wrapping onto a new row per week and
-      // stacking into lanes when multiple camps overlap the same days.
-      function calendarHtml(year, month, items) {
+      // 1か月分のカレンダー盤面。各キャンプの期間を1本の帯で描き、週をまたぐと次の行に折り返す。
+      // 同じ日に複数のキャンプがあるときは段（レーン）を分けて重ならないようにする。
+      function monthBoardHtml(year, month, items) {
         const weeks = buildWeeks(year, month);
-        const monthIds = new Set();
         let weeksHtml = "";
 
         for (const week of weeks) {
@@ -694,8 +1060,7 @@
             const segEnd = e > weekEnd ? weekEnd : e;
             const colStart = Math.round((segStart - weekStart) / 86400000);
             const colEnd = Math.round((segEnd - weekStart) / 86400000);
-            events.push({ it, colStart, colEnd });
-            monthIds.add(it.id);
+            events.push({ it, colStart, colEnd, contLeft: s < weekStart, contRight: e > weekEnd });
           }
           // Lane assignment: earliest-starting / longest events get priority,
           // each lane keeps the rightmost column it is occupied through.
@@ -717,45 +1082,108 @@
             }
           }
 
-          let dayNumsHtml = "";
+          // 1行目 = 日付、2行目以降 = 帯の段。日付のマスは全段の高さに広げる。
+          const rowSpan = Math.max(laneEnd.length, 2) + 1;
+          let daysHtml = "";
           week.forEach((d, i) => {
-            const inMonth = d.getMonth() + 1 === month;
-            dayNumsHtml += '<div class="cal-daynum' + (inMonth ? "" : " out") + '" style="grid-column:' + (i + 1) + '">' + d.getDate() + "</div>";
+            const iso = d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+            const cls = ["cal-day"];
+            if (d.getMonth() + 1 !== month) cls.push("out");
+            if (iso === TODAY) cls.push("today");
+            if (i === 0) cls.push("sun");
+            if (i === 6) cls.push("sat");
+            daysHtml += '<div class="' + cls.join(" ") + '" style="grid-column:' + (i + 1) + "; grid-row: 1 / span " + rowSpan + ';"><span class="num">' + d.getDate() + "</span></div>";
           });
 
           let barsHtml = "";
           for (const ev of events) {
             const g = GENRE_ORDER.includes(ev.it.genre) ? ev.it.genre : "その他";
-            const label = esc(ev.it.name || ev.it.id) + " " + esc(rangeLabel(ev.it));
+            const cls = ["cal-bar", g];
+            if (ev.contLeft) cls.push("cont-left");
+            if (ev.contRight) cls.push("cont-right");
+            if (statusOf(ev.it) === "ended") cls.push("ended");
+            const name = esc(ev.it.name || ev.it.id);
             barsHtml +=
-              '<div class="cal-bar ' +
-              g +
-              '" data-id="' +
-              esc(ev.it.id) +
-              '" title="' +
-              esc(ev.it.name || ev.it.id) +
-              " " +
-              esc(rangeLabel(ev.it)) +
-              '" style="grid-column:' +
-              (ev.colStart + 1) +
-              " / " +
-              (ev.colEnd + 2) +
-              "; grid-row:" +
-              (ev.lane + 2) +
-              ';">' +
-              label +
-              "</div>";
+              '<div class="' + cls.join(" ") + '" data-id="' + esc(ev.it.id) + '" title="' + name + " " + esc(rangeLabel(ev.it)) + '"' +
+              ' style="grid-column:' + (ev.colStart + 1) + " / " + (ev.colEnd + 2) + "; grid-row:" + (ev.lane + 2) + ';">' +
+              (ev.contLeft ? "… " : "") + name + "</div>";
           }
 
-          const laneCount = Math.max(laneEnd.length, 1);
-          weeksHtml +=
-            '<div class="cal-week" style="grid-template-rows: 15px repeat(' + laneCount + ', 18px);">' + dayNumsHtml + barsHtml + "</div>";
+          weeksHtml += '<div class="cal-week">' + daysHtml + barsHtml + "</div>";
         }
 
-        let html = '<section class="genre-section">';
-        html += '<div class="genre-title"><span class="bar month"></span>' + month + '月 <span class="count">' + monthIds.size + "件</span></div>";
-        html += '<div class="cal-month"><div class="cal-weekrow-header">' + WEEKDAY_LABELS.map((w) => '<div class="cal-weekday">' + w + "</div>").join("") + "</div>" + weeksHtml + "</div>";
-        html += "</section>";
+        const head = WEEKDAY_LABELS.map((w, i) => '<div class="' + (i === 0 ? "sun" : i === 6 ? "sat" : "") + '">' + w + "</div>").join("");
+        return '<div class="cal-board"><div class="cal-head">' + head + "</div>" + weeksHtml + "</div>";
+      }
+
+      // 指定の月（YYYY-MM）に期間が重なるキャンプ
+      function itemsInMonth(items, key) {
+        return items.filter((it) => monthsForItem(it).includes(key));
+      }
+
+      // 初めて開いたときの月: 今月にキャンプがあれば今月、すべて先の月なら最初の月、それ以外は今月より前で最後の月
+      let calMonth = null;
+      function defaultMonth(keys) {
+        const cur = TODAY.slice(0, 7);
+        if (keys.includes(cur)) return cur;
+        if (keys.every((k) => k > cur)) return keys[0];
+        const past = keys.filter((k) => k < cur);
+        return past.length ? past[past.length - 1] : keys[0];
+      }
+
+      // カレンダー表示全体: 月の切り替え（‹ › とタブ）＋ 1か月の盤面 ＋ その月のキャンプ一覧
+      function calendarViewHtml(dated) {
+        const cur = TODAY.slice(0, 7);
+        const keySet = new Set();
+        for (const it of dated) monthsForItem(it).forEach((k) => keySet.add(k));
+        if (activeYear === Number(TODAY.slice(0, 4))) keySet.add(cur); // 今年を表示中は、キャンプがなくても今月を選べるようにする
+        const keys = [...keySet].sort();
+        if (!keys.length) return "";
+        if (!calMonth || !keys.includes(calMonth)) calMonth = defaultMonth(keys);
+        const idx = keys.indexOf(calMonth);
+        const [y, m] = calMonth.split("-").map(Number);
+        const monthItems = itemsInMonth(dated, calMonth).sort(byStatusThenDate);
+
+        let html = '<div class="cal-wrap">';
+        html += '<div class="cal-nav">';
+        html += '<button class="cal-arrow" data-month="' + (keys[idx - 1] || "") + '"' + (idx > 0 ? "" : " disabled") + ' aria-label="前の月">‹</button>';
+        html += "<h2>" + y + "年" + m + "月</h2>";
+        html += '<button class="cal-arrow" data-month="' + (keys[idx + 1] || "") + '"' + (idx < keys.length - 1 ? "" : " disabled") + ' aria-label="次の月">›</button>';
+        html += '<span class="count">' + monthItems.length + "件</span>";
+        if (keys.includes(cur) && calMonth !== cur) html += '<button class="cal-today-btn" data-month="' + cur + '">今月に戻る</button>';
+        html += "</div>";
+
+        html += '<div class="month-tabs">';
+        for (const k of keys) {
+          const [ky, km] = k.split("-").map(Number);
+          const n = itemsInMonth(dated, k).length;
+          const cls = ["month-tab"];
+          if (k < cur) cls.push("past");
+          if (k === cur) cls.push("now");
+          if (k === calMonth) cls.push("on");
+          html += '<button class="' + cls.join(" ") + '" data-month="' + k + '">' + (ky !== y ? ky + "年" : "") + km + "月<small>" + n + "件</small></button>";
+        }
+        html += "</div>";
+
+        html += '<div class="legend">';
+        for (const g of GENRE_ORDER) if (activeGenres.has(g)) html += '<span><i style="background:' + GENRE_COLOR[g] + '"></i>' + g + "</span>";
+        html += '<span><i style="background:#4ade80;border-radius:50%"></i>今日</span><span><i style="background:#555"></i>終了</span></div>';
+
+        html += monthBoardHtml(y, m, dated);
+
+        html += '<div class="cal-list"><h3>' + m + "月のキャンプ（" + monthItems.length + "件）</h3>";
+        if (!monthItems.length) html += '<div class="cal-empty">この月のキャンプはありません。</div>';
+        for (const it of monthItems) {
+          const g = GENRE_ORDER.includes(it.genre) ? it.genre : "その他";
+          html +=
+            '<div class="cal-row' + (statusOf(it) === "ended" ? " ended" : "") + '" data-id="' + esc(it.id) + '">' +
+            '<span class="dot" style="background:' + GENRE_COLOR[g] + '"></span>' +
+            '<span class="nm">' + esc(it.name || it.id) + "</span>" +
+            '<span class="when">' + esc(rangeLabel(it)) + statusBadge(it) + "</span>" +
+            '<span class="where">' + esc([it.municipality, it.venue].filter(Boolean).join(" ・ ")) + "</span>" +
+            "</div>";
+        }
+        html += "</div></div>";
         return html;
       }
 
@@ -770,9 +1198,16 @@
 
         let html = "";
         if (groupMode === "genre") {
+          // 開催中のキャンプはジャンルに関係なく一番上にまとめる
+          const live = visible.filter((it) => statusOf(it) === "ongoing");
+          if (live.length) {
+            live.sort((a, b) => (a.endDate || "9999").localeCompare(b.endDate || "9999"));
+            html += '<section class="genre-section live-section"><div class="genre-title"><span class="bar"></span>🟢 開催中 <span class="count">' + live.length + "件</span></div>";
+            html += '<div class="grid">' + live.map(cardHtml).join("") + "</div></section>";
+          }
           const byGenre = {};
           for (const g of GENRE_ORDER) byGenre[g] = [];
-          for (const it of visible) byGenre[GENRE_ORDER.includes(it.genre) ? it.genre : "その他"].push(it);
+          for (const it of visible) if (statusOf(it) !== "ongoing") byGenre[GENRE_ORDER.includes(it.genre) ? it.genre : "その他"].push(it);
           for (const g of GENRE_ORDER) {
             const list = byGenre[g];
             if (!list.length) continue;
@@ -783,18 +1218,19 @@
           const dated = [];
           const none = [];
           for (const it of visible) (it.startDate ? dated : none).push(it);
-          const monthKeys = new Set();
-          for (const it of dated) monthsForItem(it).forEach((k) => monthKeys.add(k));
-          const sortedMonths = [...monthKeys].sort();
-          for (const key of sortedMonths) {
-            const [y, m] = key.split("-").map(Number);
-            html += calendarHtml(y, m, dated);
-          }
+          html += calendarViewHtml(dated);
           if (none.length) html += sectionHtml('<span class="bar month"></span>', "日程未定", none);
         }
         main.innerHTML = html || '<div class="empty">該当するチームがありません</div>';
-        main.querySelectorAll(".card, .cal-bar").forEach((el) => {
+        main.querySelectorAll(".card, .cal-bar, .cal-row").forEach((el) => {
           el.onclick = () => openDetail(el.dataset.id);
+        });
+        main.querySelectorAll("[data-month]").forEach((el) => {
+          el.onclick = () => {
+            if (!el.dataset.month) return;
+            calMonth = el.dataset.month;
+            render(itemsCache);
+          };
         });
       }
 
@@ -837,6 +1273,7 @@
         const btn = e.target.closest(".mode-btn");
         if (!btn || btn.classList.contains("on")) return;
         activeYear = Number(btn.dataset.year);
+        calMonth = null; // 年度を変えたら、その年度の初期の月に戻す
         render(itemsCache);
       });
 
