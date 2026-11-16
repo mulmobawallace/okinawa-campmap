@@ -157,6 +157,194 @@
       .lp a {
         color: #2563eb;
       }
+      .lp .st {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 1px 8px;
+        margin: 0 0 6px 4px;
+      }
+      .lp .st.live {
+        background: #dcfce7;
+        color: #15803d;
+        border: 1px solid #86efac;
+      }
+      .lp .st.soon,
+      .lp .st.ended {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+      }
+
+      /* --- ピン（開催中は大きく点滅、開催していないものはグレーで小さく） --- */
+      .pin {
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+        position: relative;
+      }
+      .pin.live {
+        width: 24px;
+        height: 24px;
+        border-width: 3px;
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.45);
+      }
+      .pin.live::after {
+        content: "";
+        position: absolute;
+        inset: -9px;
+        border-radius: 50%;
+        border: 3px solid var(--ring);
+        animation: pin-pulse 1.6s ease-out infinite;
+      }
+      @keyframes pin-pulse {
+        0% {
+          transform: scale(0.55);
+          opacity: 0.9;
+        }
+        100% {
+          transform: scale(1.5);
+          opacity: 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .pin.live::after {
+          animation: none;
+          opacity: 0.6;
+        }
+      }
+      .pin.soon {
+        width: 13px;
+        height: 13px;
+        background: #cbd5e1 !important;
+        border: 3px solid var(--ring);
+        opacity: 0.85;
+      }
+      .pin.ended {
+        width: 11px;
+        height: 11px;
+        background: #9ca3af !important;
+        opacity: 0.55;
+      }
+      .pin.plain {
+        width: 16px;
+        height: 16px;
+      }
+      .live-label {
+        font-size: 12px;
+        font-weight: 800;
+        color: #0f172a;
+        background: #fff;
+        border: 2px solid var(--ring, #16a34a);
+        border-radius: 999px;
+        padding: 2px 9px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+      }
+      .live-label::before {
+        display: none;
+      }
+
+      /* --- 地図右上の「開催中」一覧 --- */
+      .live-panel {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        padding: 10px 12px;
+        min-width: 210px;
+        max-width: 260px;
+        font-size: 12.5px;
+      }
+      .live-panel h3 {
+        margin: 0 0 6px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .live-panel h3 .tog {
+        margin-left: auto;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+      }
+      /* 畳んだ状態（スマホの初期表示）: 見出しの1行だけ */
+      .live-panel.collapsed {
+        min-width: 0;
+        padding: 7px 10px;
+      }
+      .live-panel.collapsed h3 {
+        margin: 0;
+      }
+      .live-panel.collapsed .body {
+        display: none;
+      }
+      .live-panel h3::before {
+        content: "";
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 6px #22c55e;
+      }
+      .live-panel .item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 4px;
+        border-radius: 6px;
+        cursor: pointer;
+        line-height: 1.3;
+      }
+      .live-panel .item:hover {
+        background: #f1f5f9;
+      }
+      .live-panel .item i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex: none;
+      }
+      .live-panel .item small {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .live-panel .none {
+        color: var(--muted);
+      }
+      .live-panel .key {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 11px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .live-panel .key span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .live-panel .key b {
+        display: inline-block;
+        border-radius: 50%;
+        flex: none;
+      }
+      .live-only {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #15803d;
+        cursor: pointer;
+        user-select: none;
+      }
 
       /* --- Mobile layout --- */
       @media (max-width: 600px) {
@@ -195,6 +383,7 @@
         <label><input type="checkbox" data-genre="Jリーグ" checked /><span class="dot Jリーグ"></span>Jリーグ</label>
         <label><input type="checkbox" data-genre="その他" checked /><span class="dot その他"></span>その他</label>
       </div>
+      <label class="live-only" id="liveOnlyLabel"><input type="checkbox" id="liveOnly" />開催中のみ表示</label>
       <div class="spacer"></div>
       <a class="home" href="index.html">🏠 トップ</a>
       <a class="nav" href="grid.html">🗂️ グリッド表示</a>
@@ -223,18 +412,69 @@
         return (s == null ? "" : String(s)).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
       }
 
-      function icon(genre) {
-        const color = GENRE_COLOR[genre] || GENRE_COLOR["その他"];
+      // 今日の日付（日本時間, YYYY-MM-DD）
+      const TODAY = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+      const THIS_YEAR = Number(TODAY.slice(0, 4));
+
+      // 開催状況: "ongoing"（開催中）/ "upcoming"（これから）/ "ended"（終了）/ "tbd"（日程未定）
+      function statusOf(it) {
+        if (!it.startDate) return "tbd";
+        const end = it.endDate || it.startDate;
+        if (end < TODAY) return "ended";
+        if (it.startDate > TODAY) return "upcoming";
+        return "ongoing";
+      }
+
+      function daysFromToday(dateStr) {
+        return Math.round((new Date(dateStr + "T00:00:00Z") - new Date(TODAY + "T00:00:00Z")) / 86400000);
+      }
+
+      function statusLabel(it) {
+        const st = statusOf(it);
+        if (st === "ongoing") {
+          if (!it.endDate) return { cls: "live", text: "開催中" };
+          const left = daysFromToday(it.endDate);
+          return { cls: "live", text: left === 0 ? "開催中・本日まで" : "開催中・残り" + (left + 1) + "日" };
+        }
+        if (st === "upcoming") {
+          const d = daysFromToday(it.startDate);
+          return { cls: "soon", text: d <= 30 ? "あと" + d + "日で開始" : "これから" };
+        }
+        if (st === "ended") return { cls: "ended", text: "終了" };
+        return { cls: "soon", text: "日程未定" };
+      }
+
+      // 開催中かどうかで色分けするのは、今年の年度を表示しているときだけ（他の年度は従来どおりジャンルの色）
+      function statusStyling() {
+        return activeYear === THIS_YEAR;
+      }
+
+      // ピンの種類: live（開催中）/ soon（これから・日程未定）/ ended（終了）/ plain（今年以外の年度）
+      function pinKind(it) {
+        if (!statusStyling()) return "plain";
+        const st = statusOf(it);
+        if (st === "ongoing") return "live";
+        if (st === "ended") return "ended";
+        return "soon";
+      }
+
+      const PIN_SIZE = { live: 24, soon: 13, ended: 11, plain: 16 };
+      function icon(it) {
+        const color = GENRE_COLOR[it.genre] || GENRE_COLOR["その他"];
+        const kind = pinKind(it);
+        const size = PIN_SIZE[kind];
         return L.divIcon({
           className: "",
-          html:
-            '<div style="width:16px;height:16px;border-radius:50%;background:' +
-            color +
-            ';border:2px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.5);"></div>',
-          iconSize: [16, 16],
-          iconAnchor: [8, 8],
-          popupAnchor: [0, -8],
+          html: '<div class="pin ' + kind + '" style="background:' + color + ";--ring:" + color + '"></div>',
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size / 2],
+          popupAnchor: [0, -size / 2],
         });
+      }
+
+      // ラベル用の短い名前（「（秋季キャンプ・国頭）」などの補足は外す）
+      function shortName(it) {
+        return String(it.name || it.id).replace(/（[^）]*）/g, "").trim();
       }
 
       function dateRange(it) {
@@ -249,6 +489,10 @@
         let html = '<div class="lp">';
         html += '<div class="title">' + esc(it.name || it.id) + "</div>";
         html += '<div class="badge" style="background:' + badge + '">' + esc(it.genre || "") + "</div>";
+        if (statusStyling()) {
+          const st = statusLabel(it);
+          html += '<span class="st ' + st.cls + '">' + esc(st.text) + "</span>";
+        }
         if (it.municipality || it.venue) html += '<div class="row"><b>場所:</b> ' + esc(it.municipality || "") + (it.venue ? " / " + esc(it.venue) : "") + "</div>";
         const dr = dateRange(it);
         if (dr) html += '<div class="row"><b>日程:</b> ' + esc(dr) + "</div>";
@@ -295,10 +539,68 @@
         renderMarkers(itemsCache);
       });
 
+      // 地図右上の「開催中」一覧（今年の年度を表示中のみ）。名前を押すとその場所へ移動して詳細を開く。
+      const markersById = {};
+      const livePanel = L.control({ position: "topright" });
+      livePanel.onAdd = function () {
+        const div = L.DomUtil.create("div", "live-panel");
+        L.DomEvent.disableClickPropagation(div);
+        L.DomEvent.disableScrollPropagation(div);
+        // スマホ幅では最初は畳んでおく（開催中のピンを一覧が隠さないように）
+        if (window.matchMedia("(max-width: 600px)").matches) div.classList.add("collapsed");
+        div.addEventListener("click", (e) => {
+          if (e.target.closest("h3")) {
+            div.classList.toggle("collapsed");
+            const t = div.querySelector(".tog");
+            if (t) t.textContent = div.classList.contains("collapsed") ? "開く ▾" : "閉じる ▴";
+            return;
+          }
+          const row = e.target.closest(".item");
+          if (!row) return;
+          const m = markersById[row.dataset.id];
+          if (!m) return;
+          map.setView(m.getLatLng(), Math.max(map.getZoom(), 12));
+          m.openPopup();
+        });
+        return div;
+      };
+      livePanel.addTo(map);
+
+      function renderLivePanel(items) {
+        const div = livePanel.getContainer();
+        if (!statusStyling()) {
+          div.style.display = "none";
+          return;
+        }
+        div.style.display = "";
+        const live = items.filter((it) => statusOf(it) === "ongoing").sort((a, b) => (a.endDate || "9999").localeCompare(b.endDate || "9999"));
+        const collapsed = div.classList.contains("collapsed");
+        let html = "<h3>開催中 " + live.length + '件<span class="tog">' + (collapsed ? "開く ▾" : "閉じる ▴") + "</span></h3>";
+        html += '<div class="body">';
+        if (!live.length) html += '<div class="none">今日開催中のキャンプはありません</div>';
+        for (const it of live) {
+          const color = GENRE_COLOR[it.genre] || GENRE_COLOR["その他"];
+          html +=
+            '<div class="item" data-id="' + esc(it.id) + '"><i style="background:' + color + '"></i><div>' + esc(shortName(it)) +
+            "<small>" + esc(it.municipality || "") + "・" + esc(statusLabel(it).text) + "</small></div></div>";
+        }
+        html +=
+          '<div class="key"><span><b style="width:14px;height:14px;background:#22c55e;box-shadow:0 0 0 2px #bbf7d0"></b>開催中（大きく点滅）</span>' +
+          '<span><b style="width:10px;height:10px;background:#cbd5e1;border:2px solid #64748b"></b>これから（縁がジャンルの色）</span>' +
+          '<span><b style="width:9px;height:9px;background:#9ca3af;opacity:.6"></b>終了</span></div>';
+        html += "</div>";
+        div.innerHTML = html;
+      }
+
       function renderMarkers(allItems) {
         renderYearSelect(allItems);
-        const items = allItems.filter((it) => activeYear == null || yearOf(it) === activeYear);
+        const liveOnly = document.getElementById("liveOnly").checked && statusStyling();
+        document.getElementById("liveOnlyLabel").style.display = statusStyling() ? "" : "none";
+        const yearItems = allItems.filter((it) => activeYear == null || yearOf(it) === activeYear);
+        const items = yearItems.filter((it) => !liveOnly || statusOf(it) === "ongoing");
+        renderLivePanel(yearItems.filter((it) => !hiddenGenres.has(it.genre)));
         markerLayer.clearLayers();
+        for (const k in markersById) delete markersById[k];
         const withCoords = items.filter((it) => typeof it.lat === "number" && typeof it.lng === "number" && !isNaN(it.lat) && !isNaN(it.lng));
         // jitter identical coordinates so overlapping pins (same venue) are all visible
         const groups = {};
@@ -318,9 +620,15 @@
               lng += Math.sin(angle) * 0.0018;
             }
             if (hiddenGenres.has(it.genre)) return;
-            const marker = L.marker([lat, lng], { icon: icon(it.genre) });
+            const kind = pinKind(it);
+            // 開催中は手前、終了は一番奥に表示する
+            const marker = L.marker([lat, lng], { icon: icon(it), zIndexOffset: kind === "live" ? 1000 : kind === "ended" ? -1000 : 0 });
             marker.bindPopup(popupViewHtml(it), { maxWidth: 280 });
+            if (kind === "live") {
+              marker.bindTooltip(esc(shortName(it)), { permanent: true, direction: "right", offset: [14, 0], className: "live-label" });
+            }
             marker.addTo(markerLayer);
+            markersById[it.id] = marker;
           });
         }
       }
@@ -332,6 +640,8 @@
         else hiddenGenres.add(cb.dataset.genre);
         renderMarkers(itemsCache);
       });
+
+      document.getElementById("liveOnly").addEventListener("change", () => renderMarkers(itemsCache));
 
       async function load() {
         const res = await fetch("data.json");
